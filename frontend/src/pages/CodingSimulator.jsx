@@ -4,7 +4,7 @@ import CodeEditor from "../components/CodeEditor";
 import AIFeedback from "./AIFeedback";
 import api from "../api/axios";
 
-/* ================= DEFAULT STARTER CODES ================= */
+/* DEFAULT STARTER CODES */
 const DEFAULT_CODE = {
   javascript: `function solution(...args) {
   // Write your logic here
@@ -31,7 +31,6 @@ auto solution(vector<int> args) {
 }`
 };
 
-/* ================= COMMON PRE STYLE ================= */
 const preStyle =
   "whitespace-pre-wrap break-words overflow-x-auto max-w-full bg-black text-green-400 p-3 rounded-lg text-sm";
 
@@ -48,7 +47,7 @@ const CodingSimulator = () => {
 
   const currentProblem = problems[currentIndex];
 
-  /* ================= FETCH PROBLEMS ================= */
+  /* FETCH PROBLEMS */
   useEffect(() => {
     const fetchProblems = async () => {
       try {
@@ -61,7 +60,7 @@ const CodingSimulator = () => {
     fetchProblems();
   }, []);
 
-  /* ================= RESET ON CHANGE ================= */
+  /*RESET ON CHANGE */
   useEffect(() => {
     if (!currentProblem) return;
 
@@ -75,7 +74,6 @@ const CodingSimulator = () => {
     setErrorLine(null);
   }, [language, currentIndex, currentProblem]);
 
-  /* ================= ERROR SIMPLIFIER (FIXED) ================= */
   const simplifyError = (err) => {
     setErrorLine(null);
     if (!err) return "Runtime Error ❌";
@@ -111,7 +109,7 @@ const CodingSimulator = () => {
     return clean ? clean.slice(0, 120) : "Runtime Error ❌";
   };
 
-  /* ================= RUN CODE ================= */
+  /* RUN CODE */
   const handleRun = async () => {
     if (!currentProblem) return;
 
@@ -157,7 +155,7 @@ const CodingSimulator = () => {
     setLoading(false);
   };
 
-  /* ================= SUBMIT CODE ================= */
+  /* SUBMIT CODE */
   const handleSubmit = async () => {
     if (!currentProblem) return;
 
@@ -208,7 +206,7 @@ const CodingSimulator = () => {
     setLoading(false);
   };
 
-  /* ================= NAVIGATION ================= */
+  /* NAVIGATION  */
   const handlePrev = () => {
     if (currentIndex > 0) setCurrentIndex(i => i - 1);
   };
