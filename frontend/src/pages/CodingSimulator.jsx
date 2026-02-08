@@ -4,18 +4,40 @@ import CodeEditor from "../components/CodeEditor";
 import AIFeedback from "./AIFeedback";
 import api from "../api/axios";
 
+/* ================= DEFAULT STARTER CODES ================= */
 const DEFAULT_CODE = {
-  javascript: `function solution(...args) {\n  // Write your logic here\n  return args;\n}\nmodule.exports = solution;`,
-  python: `def solution(*args):\n    # Write your logic here\n    return args`,
-  java: `class Solution {\n  public static Object solution(Object... args) {\n  // Write your logic here\n  return args;\n  }\n}`,
-  cpp: `#include <bits/stdc++.h>\nusing namespace std;\nauto solution(vector<int> args) {\n  // Write your logic here\n  return args;\n}`
+  javascript: `function solution(...args) {
+  // Write your logic here
+  return args;
+}
+module.exports = solution;`,
+
+  python: `def solution(*args):
+    # Write your logic here
+    return args`,
+
+  java: `class Solution {
+  public static Object solution(Object... args) {
+    // Write your logic here
+    return args;
+  }
+}`,
+
+  cpp: `#include <bits/stdc++.h>
+using namespace std;
+auto solution(vector<int> args) {
+  // Write your logic here
+  return args;
+}`
 };
 
-const preStyle = "whitespace-pre-wrap break-words overflow-x-auto max-w-full";
+/* ================= COMMON PRE STYLE ================= */
+const preStyle =
+  "whitespace-pre-wrap break-words overflow-x-auto max-w-full bg-black text-green-400 p-3 rounded-lg text-sm";
 
 const CodingSimulator = () => {
   const [problems, setProblems] = useState([]);
-  const [currentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [language, setLanguage] = useState("javascript");
   const [code, setCode] = useState(DEFAULT_CODE.javascript);
   const [output, setOutput] = useState("");
@@ -26,11 +48,12 @@ const CodingSimulator = () => {
 
   const currentProblem = problems[currentIndex];
 
+  /* ================= FETCH PROBLEMS ================= */
   useEffect(() => {
     const fetchProblems = async () => {
       try {
         const res = await api.get("/problems");
-        setProblems(res.data);
+        setProblems(res.data || []);
       } catch (err) {
         console.error(err);
       }
@@ -38,45 +61,60 @@ const CodingSimulator = () => {
     fetchProblems();
   }, []);
 
+  /* ================= RESET ON CHANGE ================= */
   useEffect(() => {
-    if (!problems.length) return;
-    const starter = problems[currentIndex]?.starterCode?.[language] || DEFAULT_CODE[language];
+    if (!currentProblem) return;
+
+    const starter =
+      currentProblem.starterCode?.[language] || DEFAULT_CODE[language];
+
     setCode(starter);
     setOutput("");
     setTestResults([]);
     setSubmissionId(null);
     setErrorLine(null);
-  }, [language, currentIndex, problems]);
+  }, [language, currentIndex, currentProblem]);
 
+  /* ================= ERROR SIMPLIFIER (FIXED) ================= */
   const simplifyError = (err) => {
     setErrorLine(null);
     if (!err) return "Runtime Error ❌";
 
     const msg = String(err);
-    const lines = msg.split("\n").filter(l => l.trim() !== "");
+    const lines = msg.split("\n").filter(Boolean);
     let line = null;
 
-    // Detect error line number based on language
     if (language === "javascript") {
-      const match = msg.match(/:(\d+):\d+\)?$/);
-      if (match) line = parseInt(match[1]);
+      const match =
+        msg.match(/solution\.js:(\d+)/) ||
+        msg.match(/:(\d+):\d+/);
+      if (match) line = parseInt(match[1], 10);
     } else if (language === "python") {
-      const match = msg.match(/line (\d+)/i);
-      if (match) line = parseInt(match[1]);
+      const m = msg.match(/line (\d+)/i);
+      if (m) line = +m[1];
     } else if (language === "java") {
-      const match = msg.match(/:(\d+):/);
-      if (match) line = parseInt(match[1]);
+      const m = msg.match(/:(\d+):/);
+      if (m) line = +m[1];
     } else if (language === "cpp") {
-      const match = msg.match(/:(\d+):\d+:/);
-      if (match) line = parseInt(match[1]);
+      const m = msg.match(/:(\d+):\d+:/);
+      if (m) line = +m[1];
     }
 
     if (line) setErrorLine(line);
-    return lines.length > 0 ? lines[0].slice(0, 120) : "Runtime Error ❌";
+
+    const clean =
+      lines.find(l =>
+        l.toLowerCase().includes("error") ||
+        l.toLowerCase().includes("exception")
+      ) || lines[0];
+
+    return clean ? clean.slice(0, 120) : "Runtime Error ❌";
   };
 
+  /* ================= RUN CODE ================= */
   const handleRun = async () => {
     if (!currentProblem) return;
+
     setLoading(true);
     setOutput("Running...");
     setTestResults([]);
@@ -89,30 +127,40 @@ const CodingSimulator = () => {
         problemId: currentProblem._id
       });
 
-      const cleanedResults = (res.data.results || []).map(r => ({
+      const results = (res.data.results || []).map(r => ({
         ...r,
         output: String(r.output),
         expected: String(r.expected),
-        passed: String(r.output).replace(/\s/g, "") === String(r.expected).replace(/\s/g, "")
+        passed:
+          String(r.output).replace(/\s/g, "") ===
+          String(r.expected).replace(/\s/g, "")
       }));
 
-      setTestResults(cleanedResults);
-      const total = cleanedResults.length;
-      const passedCount = cleanedResults.filter(t => t.passed).length;
+      setTestResults(results);
+
+      const passed = results.filter(t => t.passed).length;
       setOutput(
-        passedCount === total
+        passed === results.length
           ? "✅ All test cases passed"
-          : `❌ Wrong Answer (${passedCount}/${total} passed)`
+          : `❌ Wrong Answer (${passed}/${results.length})`
       );
     } catch (err) {
-      setOutput(simplifyError(err.response?.data?.error || err.response?.data?.message || err.message));
+      setOutput(
+        simplifyError(
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message
+        )
+      );
     }
 
     setLoading(false);
   };
 
+  /* ================= SUBMIT CODE ================= */
   const handleSubmit = async () => {
     if (!currentProblem) return;
+
     setLoading(true);
     setOutput("Submitting...");
     setTestResults([]);
@@ -126,59 +174,92 @@ const CodingSimulator = () => {
         problemId: currentProblem._id
       });
 
-      const cleanedResults = (res.data.results || []).map(r => ({
+      const results = (res.data.results || []).map(r => ({
         ...r,
         output: String(r.output),
         expected: String(r.expected),
-        passed: String(r.output).replace(/\s/g, "") === String(r.expected).replace(/\s/g, "")
+        passed:
+          String(r.output).replace(/\s/g, "") ===
+          String(r.expected).replace(/\s/g, "")
       }));
 
-      setTestResults(cleanedResults);
-      const total = cleanedResults.length;
-      const passedCount = cleanedResults.filter(t => t.passed).length;
+      setTestResults(results);
 
+      const passed = results.filter(t => t.passed).length;
       setOutput(
-        passedCount === total
+        passed === results.length
           ? "🎉 Accepted"
-          : `❌ Wrong Answer (${passedCount}/${total} passed)`
+          : `❌ Wrong Answer (${passed}/${results.length})`
       );
 
-      if (res.data.submissionId) setSubmissionId(res.data.submissionId);
+      if (res.data.submissionId) {
+        setSubmissionId(res.data.submissionId);
+      }
     } catch (err) {
-      setOutput(simplifyError(err.response?.data?.error || err.response?.data?.message || err.message));
+      setOutput(
+        simplifyError(
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message
+        )
+      );
     }
 
     setLoading(false);
   };
 
+  /* ================= NAVIGATION ================= */
+  const handlePrev = () => {
+    if (currentIndex > 0) setCurrentIndex(i => i - 1);
+  };
+
+  const handleNext = () => {
+    if (currentIndex < problems.length - 1) setCurrentIndex(i => i + 1);
+  };
+
+  if (!currentProblem) {
+    return <p className="p-6">Loading problems...</p>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">Coding Simulator</h1>
+      <h1 className="text-3xl font-bold mb-6 text-indigo-700">
+        Coding Simulator
+      </h1>
 
-      {currentProblem && (
-        <div className="bg-white p-6 rounded-2xl shadow mb-6 overflow-hidden">
-          <h2 className="text-2xl font-semibold mb-2">{currentProblem.title}</h2>
-          <p className="text-gray-700 whitespace-pre-line mb-4">{currentProblem.description}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-indigo-600">
+          <h2 className="text-2xl font-semibold mb-2">
+            {currentProblem.title}
+          </h2>
+
+          <p className="text-gray-700 whitespace-pre-line mb-4">
+            {currentProblem.description}
+          </p>
 
           {currentProblem.testCases?.length > 0 && (
             <div className="mb-4">
-              <h3 className="font-semibold mb-2">Test Cases:</h3>
+              <h3 className="font-semibold mb-2 text-indigo-700">
+                🧪 Sample Test Cases
+              </h3>
+
               {currentProblem.testCases.map((t, i) => (
-                <div key={i} className="bg-gray-50 p-3 rounded mb-2">
-                  <p><b>Input:</b></p>
+                <div key={i} className="bg-gray-50 border rounded-lg p-4 mb-3">
+                  <p className="font-medium">Input</p>
                   <pre className={preStyle}>{t.input}</pre>
-                  <p><b>Expected Output:</b></p>
+
+                  <p className="font-medium mt-2">Expected Output</p>
                   <pre className={preStyle}>{t.output}</pre>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
+          <div className="flex justify-between items-center flex-wrap gap-2 mt-4">
             <select
               className="border rounded px-3 py-1"
               value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={e => setLanguage(e.target.value)}
             >
               <option value="javascript">JavaScript</option>
               <option value="python">Python</option>
@@ -187,58 +268,66 @@ const CodingSimulator = () => {
             </select>
 
             <div className="flex gap-3">
-              <button
-                onClick={handleRun}
-                disabled={loading}
-                className="bg-indigo-600 text-white px-4 py-2 rounded flex items-center gap-2"
-              ><FaPlay /> Run</button>
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-              ><FaUpload /> Submit</button>
+              <button onClick={handleRun} disabled={loading}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded flex items-center gap-2">
+                <FaPlay /> Run
+              </button>
+
+              <button onClick={handleSubmit} disabled={loading}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-2">
+                <FaUpload /> Submit
+              </button>
             </div>
           </div>
-        </div>
-      )}
 
-      <div className="bg-white p-6 rounded-2xl shadow mb-6 overflow-hidden">
-        <CodeEditor
-          code={code}
-          setCode={setCode}
-          language={language}
-          height="500px"
-          highlightLine={errorLine}
-        />
-      </div>
+          <div className="flex justify-between items-center mt-6">
+            <button onClick={handlePrev} disabled={currentIndex === 0}
+              className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-40">
+              ⬅ Prev
+            </button>
 
-      <div className="bg-white p-6 rounded-2xl shadow overflow-hidden">
-        <h3 className="font-semibold mb-2">Output</h3>
-        <pre
-          className={`p-4 rounded min-h-[120px] ${preStyle} ${
-            output.includes("❌") || output.toLowerCase().includes("error")
-              ? "bg-red-900 text-red-200"
-              : "bg-black text-green-400"
-          }`}
-        >
-          {output}
-        </pre>
+            <span className="text-sm text-gray-600">
+              Problem {currentIndex + 1} / {problems.length}
+            </span>
 
-        {testResults.length > 0 && (
-          <div className="mt-4">
-            <h3 className="font-semibold mb-2">Test Case Results:</h3>
-            {testResults.map((t, i) => (
-              <div key={i} className={`p-3 rounded mb-2 ${t.passed ? "bg-green-100 border-l-4 border-green-500" : "bg-red-100 border-l-4 border-red-500"}`}>
-                <p><b>Input:</b></p><pre className={preStyle}>{t.input}</pre>
-                <p><b>Expected:</b></p><pre className={preStyle}>{t.expected}</pre>
-                <p><b>Your Output:</b></p><pre className={preStyle}>{t.output}</pre>
-                <p><b>Status:</b> {t.passed ? "✅ Passed" : "❌ Failed"}</p>
-              </div>
-            ))}
+            <button onClick={handleNext}
+              disabled={currentIndex === problems.length - 1}
+              className="px-4 py-2 bg-indigo-700 text-white rounded disabled:opacity-40">
+              Next ➡
+            </button>
           </div>
-        )}
+        </div>
 
-        {submissionId && <AIFeedback submissionId={submissionId} />}
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <CodeEditor
+              code={code}
+              setCode={setCode}
+              language={language}
+              height="500px"
+              highlightLine={errorLine}
+            />
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <h3 className="font-semibold mb-2">Output</h3>
+
+            <pre className={preStyle}>{output}</pre>
+
+            {testResults.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-semibold mb-2">Test Case Results</h3>
+                {testResults.map((t, i) => (
+                  <div key={i} className="p-3 rounded mb-2">
+                    <pre className={preStyle}>{t.output}</pre>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {submissionId && <AIFeedback submissionId={submissionId} />}
+          </div>
+        </div>
       </div>
     </div>
   );
