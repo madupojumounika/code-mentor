@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
-import api from "../api/axios"; 
+import api from "../api/axios";
 import {
   FaCheckCircle,
   FaBolt,
   FaExclamationTriangle,
   FaLightbulb,
+  FaMoon,
+  FaSun,
 } from "react-icons/fa";
 import DashboardCard from "../components/DashboardCard";
 
@@ -14,19 +16,25 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+  }, [darkMode]);
 
   useEffect(() => {
     api
       .get("/dashboard")
       .then((res) => setDashboardData(res.data))
-      .catch((err) => console.log(err))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-gray-500 text-lg animate-pulse">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black">
+        <p className="text-gray-500 dark:text-gray-400 animate-pulse">
           Loading Dashboard...
         </p>
       </div>
@@ -38,7 +46,7 @@ const Dashboard = () => {
       title: "Problems Solved",
       value: dashboardData?.problemsSolved ?? 0,
       icon: FaCheckCircle,
-      color: "text-green-500",
+      color: "text-green-400",
     },
     {
       title: "Average Score",
@@ -53,143 +61,167 @@ const Dashboard = () => {
           ? dashboardData.weakAreas.join(", ")
           : "None",
       icon: FaExclamationTriangle,
-      color: "text-red-500",
+      color: "text-red-400",
     },
   ];
 
   const recentActivity = dashboardData?.recentActivity || [];
   const upcomingChallenges = dashboardData?.upcomingChallenges || [];
   const skills = dashboardData?.skills || [];
-  const practiceRecommendations = dashboardData?.practiceRecommendations || [];
+  const practiceRecommendations =
+    dashboardData?.practiceRecommendations || [];
+
+  const neonCard =
+    "relative rounded-3xl p-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500";
+
+  const neonInner =
+    "relative rounded-3xl p-6 bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-white/10 shadow-xl dark:shadow-[0_0_30px_rgba(99,102,241,0.25)] hover:shadow-[0_0_60px_rgba(168,85,247,0.45)] transition-all duration-300";
 
   return (
-    <div className="min-h-screen px-6 py-10 bg-gray-100">
-      <motion.h1
-        className="text-3xl md:text-4xl font-bold mb-10 text-gray-800"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        Welcome, {user?.name || "User"} 👋
-      </motion.h1>
+    <div className="min-h-screen px-6 py-10 bg-gradient-to-br from-indigo-100 via-white to-purple-100 dark:from-black dark:via-gray-950 dark:to-gray-900 transition-colors duration-500">
+      <div className="flex justify-between items-center mb-14">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white"
+        >
+          Welcome,{" "}
+          <span className="text-indigo-600 dark:text-indigo-400">
+            {user?.name || "User"}
+          </span>{" "}
+          👋
+        </motion.h1>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 shadow-lg hover:scale-110 transition"
+        >
+          {darkMode ? (
+            <FaSun className="text-yellow-400 text-lg" />
+          ) : (
+            <FaMoon className="text-indigo-700 text-lg" />
+          )}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         {stats.map((stat, idx) => (
-          <DashboardCard
-            key={idx}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-            color={stat.color}
-          />
+          <div key={idx} className={neonCard}>
+            <div className={neonInner}>
+              <DashboardCard
+                title={stat.title}
+                value={stat.value}
+                icon={stat.icon}
+                color={stat.color}
+              />
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Weak Areas Badges */}
-      <div className="mb-10">
-        <h3 className="text-lg font-semibold mb-3">Weak Areas</h3>
-        <div className="flex flex-wrap gap-2">
-          {dashboardData?.weakAreas?.length > 0 ? (
-            dashboardData.weakAreas.map((area, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm"
-              >
-                {area}
-              </span>
-            ))
-          ) : (
-            <span className="text-gray-500">None</span>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-        {/* Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
         <motion.div
-          className="bg-white rounded-2xl shadow-xl p-6"
-          initial={{ opacity: 0, x: -50 }}
+          initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7 }}
+          className={neonCard}
         >
-          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-          <ul className="space-y-3 text-gray-700">
-            {recentActivity.length > 0 ? (
-              recentActivity.map((item, idx) => (
-                <li key={idx} className="flex items-center gap-2">
-                  <FaCheckCircle className="text-green-500" />
-                  {item}
-                </li>
-              ))
-            ) : (
-              <li className="text-gray-500">No recent activity</li>
-            )}
-          </ul>
+          <div className={neonInner}>
+            <h3 className="text-xl font-bold mb-5 text-gray-900 dark:text-white">
+              📌 Recent Activity
+            </h3>
+            <ul className="space-y-4 text-gray-700 dark:text-gray-300">
+              {recentActivity.length ? (
+                recentActivity.map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-green-500/20 flex items-center justify-center">
+                      <FaCheckCircle className="text-green-400" />
+                    </div>
+                    {item}
+                  </li>
+                ))
+              ) : (
+                <li className="text-gray-400">No recent activity</li>
+              )}
+            </ul>
+          </div>
         </motion.div>
 
-        {/* Upcoming Challenges */}
         <motion.div
-          className="bg-white rounded-2xl shadow-xl p-6"
-          initial={{ opacity: 0, x: 50 }}
+          initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7 }}
+          className={neonCard}
         >
-          <h3 className="text-lg font-semibold mb-4">Upcoming Challenges</h3>
-          <ul className="space-y-3 text-gray-700">
-            {upcomingChallenges.length > 0 ? (
-              upcomingChallenges.map((item, idx) => (
-                <li key={idx} className="flex items-center gap-2">
-                  <FaBolt className="text-yellow-400" />
-                  {item}
-                </li>
-              ))
-            ) : (
-              <li className="text-gray-500">No upcoming challenges</li>
-            )}
-          </ul>
+          <div className={neonInner}>
+            <h3 className="text-xl font-bold mb-5 text-gray-900 dark:text-white">
+              🚀 Upcoming Challenges
+            </h3>
+            <ul className="space-y-4 text-gray-700 dark:text-gray-300">
+              {upcomingChallenges.length ? (
+                upcomingChallenges.map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                      <FaBolt className="text-yellow-400" />
+                    </div>
+                    {item}
+                  </li>
+                ))
+              ) : (
+                <li className="text-gray-400">No upcoming challenges</li>
+              )}
+            </ul>
+          </div>
         </motion.div>
       </div>
 
-      {/* Skills */}
-      <div className="mb-10">
-        <h3 className="text-lg font-semibold mb-3">Skills</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {skills.length > 0 ? (
+      <div className="mb-16">
+        <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
+          💡 Skills
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {skills.length ? (
             skills.map((skill, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl shadow-xl p-4 flex flex-col items-center"
-              >
-                <FaLightbulb className="text-yellow-400 mb-2" />
-                <p className="font-semibold">{skill.name}</p>
-                <p>{skill.score}%</p>
+              <div key={idx} className={neonCard}>
+                <div className={neonInner}>
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-3">
+                    <FaLightbulb className="text-indigo-400 text-lg" />
+                  </div>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {skill.name}
+                  </p>
+                  <p className="text-indigo-600 dark:text-indigo-400 font-bold">
+                    {skill.score}%
+                  </p>
+                </div>
               </div>
             ))
           ) : (
-            <p className="text-gray-500">No skill data available</p>
+            <p className="text-gray-400">No skills data</p>
           )}
         </div>
       </div>
 
-      {/* Practice Recommendations */}
-      <div className="mb-10">
-        <h3 className="text-lg font-semibold mb-3">Practice Recommendations</h3>
-        <ul className="space-y-3">
-          {practiceRecommendations.length > 0 ? (
+      <div>
+        <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
+          📚 Practice Recommendations
+        </h3>
+        <div className="space-y-6">
+          {practiceRecommendations.length ? (
             practiceRecommendations.map((rec, idx) => (
-              <li
-                key={idx}
-                className="bg-white rounded-2xl shadow-xl p-4 flex flex-col"
-              >
-                <p className="font-semibold">{rec.title}</p>
-                <p className="text-gray-600">{rec.description}</p>
-              </li>
+              <div key={idx} className={neonCard}>
+                <div className={neonInner}>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {rec.title}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {rec.description}
+                  </p>
+                </div>
+              </div>
             ))
           ) : (
-            <p className="text-gray-500">No recommendations yet</p>
+            <p className="text-gray-400">No recommendations yet</p>
           )}
-        </ul>
+        </div>
       </div>
     </div>
   );
