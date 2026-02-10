@@ -10,6 +10,6 @@ router.get("/problem/:id", getProblemById);
 
 // Run & Submit
 router.post("/run", runCodeOnly);
-router.post("/submit", submitCode);
+router.post("/submit", protect, submitCode);
 
 export default router;
