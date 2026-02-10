@@ -1,28 +1,26 @@
 import Submission from "../models/Submission.js";
-import Problem from "../models/problem.js";
+import { loadProblems } from "../utils/problemLoader.js";
 
 export const getDashboard = async (req, res) => {
   try {
-    const userId = req.user._id.toString(); 
+    const userId = req.user?._id?.toString() || "guest";
 
-    const submissions = await Submission.find({ userId }).sort({ createdAt: 1 });
+    const submissions = await Submission.find({ userId }).sort({ createdAt: -1 });
 
+    // ✅ FIX 1: use passed
     const solvedProblemSet = new Set(
-      submissions
-        .filter(s => s.status === "Accepted")
-        .map(s => s.problemId)
+      submissions.filter(s => s.passed).map(s => String(s.problemId))
     );
 
     const problemsSolved = solvedProblemSet.size;
 
     const avgScore = submissions.length
       ? Math.round(
-          (submissions.filter(s => s.status === "Accepted").length /
-            submissions.length) *
-            100
+          (submissions.filter(s => s.passed).length / submissions.length) * 100
         )
       : 0;
 
+    // pattern performance
     const patternScores = {};
     submissions.forEach(s => {
       if (!s.pattern) return;
@@ -32,9 +30,7 @@ export const getDashboard = async (req, res) => {
       }
 
       patternScores[s.pattern].total++;
-      if (s.status === "Accepted") {
-        patternScores[s.pattern].correct++;
-      }
+      if (s.passed) patternScores[s.pattern].correct++;
     });
 
     const weakAreas = Object.entries(patternScores)
@@ -45,16 +41,15 @@ export const getDashboard = async (req, res) => {
       .filter(p => p.score < 50)
       .map(p => p.pattern);
 
-    const recentActivity = submissions
-      .slice(-5)
-      .reverse()
-      .map(
-        s => `Problem ${s.problemId} → ${s.status === "Accepted" ? "Solved" : "Attempted"}`
-      );
+    const recentActivity = submissions.slice(0, 5).map(s => ({
+      problemId: s.problemId,
+      status: s.passed ? "Solved" : "Attempted",
+    }));
 
-    const allProblems = await Problem.find();
+    // ✅ FIX 3: same source as submit
+    const allProblems = loadProblems();
     const upcomingChallenges = allProblems
-      .filter(p => !solvedProblemSet.has(p._id.toString()))
+      .filter(p => !solvedProblemSet.has(String(p._id)))
       .slice(0, 5)
       .map(p => p.title);
 
@@ -77,8 +72,9 @@ export const getDashboard = async (req, res) => {
       skills,
       practiceRecommendations,
     });
+
   } catch (err) {
-    console.error("Error in dashboard:", err);
+    console.error("Dashboard error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
