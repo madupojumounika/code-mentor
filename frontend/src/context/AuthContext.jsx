@@ -4,11 +4,11 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken"); // ✅ FIX
 
     if (storedUser && token) {
       setUser({ ...JSON.parse(storedUser), token });
@@ -20,14 +20,15 @@ export const AuthProvider = ({ children }) => {
   // Login
   const login = (token, userData) => {
     setUser({ ...userData, token });
-    localStorage.setItem("token", token);
+
     localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("accessToken", token); // already correct
   };
 
-  // Logout 
+  // Logout
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken"); // ✅ FIX
     localStorage.removeItem("user");
   };
 
