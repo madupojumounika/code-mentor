@@ -1,11 +1,10 @@
 import { loadProblems } from "../utils/problemLoader.js";
 import Submission from "../models/Submission.js";
 import { runCode } from "../utils/codeWrapper.js";
-import { analyzeCode } from "../utils/codeAnalysis.js";
 import User from "../models/User.js";
+import { analyzeSubmission } from "../utils/analyzeSubmission.js";
 
-/* GET ALL PROBLEMS*/
-export const getAllProblems = async (req, res) => {
+export const getAllProblems = (req, res) => {
   try {
     res.json(loadProblems());
   } catch (err) {
@@ -14,10 +13,10 @@ export const getAllProblems = async (req, res) => {
   }
 };
 
-export const getProblemById = async (req, res) => {
+export const getProblemById = (req, res) => {
   try {
     const problem = loadProblems().find(
-      p => String(p._id) === String(req.params.id) || p.title === req.params.id
+      (p) => String(p._id) === String(req.params.id) || p.title === req.params.id
     );
     if (!problem) return res.status(404).json({ error: "Problem not found" });
     res.json(problem);
@@ -27,22 +26,44 @@ export const getProblemById = async (req, res) => {
   }
 };
 
-/* RUN CODE*/
 export const runCodeOnly = async (req, res) => {
   try {
     const { language, code, problemId } = req.body;
-    if (!language || !code || !problemId) 
+    if (!language || !code || !problemId)
       return res.status(400).json({ error: "Missing fields" });
 
-    const problem = loadProblems().find(p => String(p._id) === String(problemId));
+    const problem = loadProblems().find((p) => String(p._id) === String(problemId));
     if (!problem) return res.status(404).json({ error: "Problem not found" });
 
-    runCode({ language, code, testCases: problem.testCases }, results => {
-      const normalized = results.map(r => ({
+    runCode({ language, code, testCases: problem.testCases }, async (results, runtimeError) => {
+      if (runtimeError) {
+        return res.json({
+          status: "Runtime Error ❌",
+          results: [],
+          error: runtimeError,
+          weakAreas: [],
+          aiFeedback: null
+        });
+      }
+
+      const normalized = results.map((r) => ({
         ...r,
-        passed: String(r.output).replace(/\s/g, '') === String(r.expected).replace(/\s/g, '')
+        passed: r.hasOwnProperty("output") && String(r.output).replace(/\s/g, "") === String(r.expected).replace(/\s/g, "")
       }));
-      res.json({ results: normalized });
+
+      const anyPassed = normalized.some(r => r.passed);
+      const weakAreas = [];
+
+      let feedback = null;
+      if (anyPassed) {
+        const submissionContext = { problem, submission: { code, language, status: "Run Only" } };
+        feedback = await analyzeSubmission(submissionContext);
+        ["Efficiency", "Code Readability", "Edge Cases"].forEach((key) => {
+          if (feedback[key].score < 7) weakAreas.push(problem.pattern);
+        });
+      }
+
+      res.json({ results: normalized, aiFeedback: feedback, weakAreas });
     });
   } catch (err) {
     console.error(err);
@@ -50,89 +71,93 @@ export const runCodeOnly = async (req, res) => {
   }
 };
 
-//submitcode
 export const submitCode = async (req, res) => {
   try {
     const { language, code, problemId } = req.body;
     const userId = req.user?._id;
-
-    if (!language || !code || !problemId) {
+    if (!language || !code || !problemId)
       return res.status(400).json({ error: "Missing fields" });
-    }
 
-    const problem = loadProblems().find(
-      (p) => String(p._id) === String(problemId)
-    );
+    const problem = loadProblems().find((p) => String(p._id) === String(problemId));
+    if (!problem) return res.status(404).json({ error: "Problem not found" });
 
-    if (!problem) {
-      return res.status(404).json({ error: "Problem not found" });
-    }
-
-    runCode({ language, code, testCases: problem.testCases }, async (results) => {
-      try {
-        const normalized = results.map((r) => ({
-          ...r,
-          passed:
-            String(r.output).replace(/\s/g, "") ===
-            String(r.expected).replace(/\s/g, ""),
-        }));
-
-        const passed = normalized.every((r) => r.passed);
-        const status = passed ? "Accepted ✅" : "Wrong Answer ❌";
-
-        const submission = await Submission.create({
-          userId,
-          problemId,
-          language,
-          code,
-          status,
-          passed,
-          pattern: problem.pattern,
-          difficulty: problem.difficulty,
+    runCode({ language, code, testCases: problem.testCases }, async (results, runtimeError) => {
+      if (runtimeError) {
+        return res.json({
+          status: "Runtime Error ❌",
+          results: [],
+          error: runtimeError,
+          weakAreas: [],
+          aiFeedback: null,
+          skills: userId ? (await User.findById(userId)).skills : []
         });
+      }
 
-        if (passed && userId) {
-          const user = await User.findById(userId);
+      const normalized = results.map((r) => ({
+        ...r,
+        passed: r.hasOwnProperty("output") && String(r.output).replace(/\s/g, "") === String(r.expected).replace(/\s/g, "")
+      }));
 
-          if (user) {
+      const passed = normalized.every(r => r.passed);
+      const status = passed ? "Accepted ✅" : "Wrong Answer ❌";
+
+      const submission = await Submission.create({
+        userId,
+        problemId,
+        language,
+        code,
+        status,
+        passed,
+        pattern: problem.pattern,
+        difficulty: problem.difficulty
+      });
+
+      let feedback = null;
+      const weakAreas = [];
+      const anyPassed = normalized.some(r => r.passed);
+
+      if (anyPassed) {
+        const submissionContext = { problem, submission: { code, language, status } };
+        feedback = await analyzeSubmission(submissionContext);
+        ["Efficiency", "Code Readability", "Edge Cases"].forEach((key) => {
+          if (feedback[key].score < 7) weakAreas.push(problem.pattern);
+        });
+      }
+
+      if (userId) {
+        const user = await User.findById(userId);
+        if (user) {
+          if (passed) {
             user.problemsSolved += 1;
             user.totalScore += 100;
-            user.avgScore = Math.round(
-              user.totalScore / user.problemsSolved
-            );
-
-            const skillIndex = user.skills.findIndex(
-              (s) => s.name === language
-            );
-
-            if (skillIndex !== -1) {
-              user.skills[skillIndex].score = Math.min(
-                100,
-                user.skills[skillIndex].score + 10
-              );
-            } else {
-              user.skills.push({ name: language, score: 10 });
-            }
-
+            user.avgScore = Math.round(user.totalScore / user.problemsSolved);
             user.recentActivity.unshift(`Solved ${problem.title}`);
             user.recentActivity = user.recentActivity.slice(0, 5);
-
-            await user.save();
           }
+
+          if (feedback) {
+            const skillScore = Math.round(
+              (feedback.Efficiency.score +
+                feedback["Code Readability"].score +
+                feedback["Edge Cases"].score) / 3 * 10
+            );
+            const skillIndex = user.skills.findIndex((s) => s.name === problem.pattern);
+            if (skillIndex !== -1) user.skills[skillIndex].score = skillScore;
+            else user.skills.push({ name: problem.pattern, score: skillScore });
+          }
+
+          await user.save();
         }
-
-        const aiFeedback = analyzeCode ? analyzeCode(code) : null;
-
-        res.json({
-          submissionId: submission._id,
-          status,
-          results: normalized,
-          aiFeedback,
-        });
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Submission failed" });
       }
+
+      res.json({
+        submissionId: submission._id,
+        status,
+        results: normalized,
+        aiFeedback: feedback,
+        skills: userId ? (await User.findById(userId)).skills : [],
+        weakAreas
+      });
     });
   } catch (err) {
     console.error(err);

@@ -1,10 +1,19 @@
-import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaRobot, FaHome, FaCode, FaChartLine, FaSignOutAlt } from "react-icons/fa";
+import { useTheme } from "../context/ThemeContext";
+import {
+  FaRobot,
+  FaHome,
+  FaCode,
+  FaChartLine,
+  FaSignOutAlt,
+  FaMoon,
+  FaSun,
+} from "react-icons/fa";
 
 const DashboardNavbar = () => {
   const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -13,14 +22,20 @@ const DashboardNavbar = () => {
   };
 
   const linkClass = ({ isActive }) =>
-  `flex items-center gap-2 px-3 py-1 rounded-lg transition-all duration-300
-   ${isActive 
-     ? "bg-white/20 text-white shadow-md" 
-     : "text-white hover:bg-white/10 hover:scale-105"
-   }`;
+    `flex items-center gap-2 px-3 py-1 rounded-lg transition
+     ${
+       isActive
+         ? "bg-white/20 text-white"
+         : "text-white/90 hover:bg-white/10"
+     }`;
 
   return (
-    <nav className="w-full sticky top-0 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 shadow-lg">
+    <nav className="
+      w-full sticky top-0 z-50
+      bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500
+      dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
+      shadow-lg transition-colors
+    ">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
         {/* Logo */}
@@ -29,8 +44,8 @@ const DashboardNavbar = () => {
           <h1 className="text-2xl font-bold text-white">Code Mentor</h1>
         </div>
 
-        {/* Navigation Links */}
-        <div className="flex items-center gap-8 text-white font-medium">
+        {/* Links */}
+        <div className="flex items-center gap-6 text-white font-medium">
           <NavLink to="/dashboard" className={linkClass}>
             <FaHome /> Dashboard
           </NavLink>
@@ -40,8 +55,16 @@ const DashboardNavbar = () => {
           </NavLink>
 
           <NavLink to="/skills" className={linkClass}>
-           <FaChartLine /> Skills
+            <FaChartLine /> Skills
           </NavLink>
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition"
+          >
+            {theme === "dark" ? <FaSun /> : <FaMoon />}
+          </button>
 
           <button
             onClick={handleLogout}

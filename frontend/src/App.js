@@ -1,9 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Register from "./pages/Register"; 
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CodingSimulator from "./pages/CodingSimulator";
 import SkillProgress from "./pages/SkillProgress";
@@ -14,55 +13,52 @@ import AppLayout from "./components/AppLayout";
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppLayout />}>
-            {/* PUBLIC */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} /> 
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          {/* PUBLIC */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-            {/* PROTECTED */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/simulator"
-              element={
-                <ProtectedRoute>
-                  <CodingSimulator />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/skills"
-              element={
-                <ProtectedRoute>
-                  <SkillProgress />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/feedback"
-              element={
-                <ProtectedRoute>
-                  <AIFeedback />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+          {/* PROTECTED */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/simulator"
+            element={
+              <ProtectedRoute>
+                <CodingSimulator />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skills"
+            element={
+              <ProtectedRoute>
+                <SkillProgress />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/feedback"
+            element={
+              <ProtectedRoute>
+                <AIFeedback />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
 
-          {/* FALLBACK */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

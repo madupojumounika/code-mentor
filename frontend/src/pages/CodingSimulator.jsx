@@ -323,7 +323,8 @@ const CodingSimulator = () => {
               </div>
             )}
 
-            {submissionId && <AIFeedback submissionId={submissionId} />}
+            {submissionId ? <AIFeedback submissionId={submissionId} /> : <p>Submit your code to see AI feedback</p>}
+
           </div>
         </div>
       </div>
