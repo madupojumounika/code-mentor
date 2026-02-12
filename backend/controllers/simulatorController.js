@@ -56,8 +56,12 @@ export const runCodeOnly = async (req, res) => {
 
       let feedback = null;
       if (anyPassed) {
-        const submissionContext = { problem, submission: { code, language, status: "Run Only" } };
-        feedback = await analyzeSubmission(submissionContext);
+        feedback = await analyzeSubmission({
+          problem,
+          submission: { code, language, status: "Run Only" },
+          testResults: normalized
+       });
+
         ["Efficiency", "Code Readability", "Edge Cases"].forEach((key) => {
           if (feedback[key].score < 7) weakAreas.push(problem.pattern);
         });
@@ -116,9 +120,13 @@ export const submitCode = async (req, res) => {
       const weakAreas = [];
       const anyPassed = normalized.some(r => r.passed);
 
-      if (anyPassed) {
-        const submissionContext = { problem, submission: { code, language, status } };
-        feedback = await analyzeSubmission(submissionContext);
+      if (anyPassed) { 
+        feedback = await analyzeSubmission({
+          problem,
+          submission: { code, language, status },
+          testResults: normalized
+        });
+
         ["Efficiency", "Code Readability", "Edge Cases"].forEach((key) => {
           if (feedback[key].score < 7) weakAreas.push(problem.pattern);
         });
