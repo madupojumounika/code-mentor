@@ -6,8 +6,7 @@ export const getDashboard = async (req, res) => {
     const userId = req.user?._id?.toString() || "guest";
 
     const submissions = await Submission.find({ userId }).sort({ createdAt: -1 });
-
-    // ✅ FIX 1: use passed
+    
     const solvedProblemSet = new Set(
       submissions.filter(s => s.passed).map(s => String(s.problemId))
     );
@@ -20,9 +19,10 @@ export const getDashboard = async (req, res) => {
         )
       : 0;
 
-    // pattern performance
     const patternScores = {};
-    submissions.forEach(s => {
+    const skillHistory = {};
+
+    submissions.forEach((s) => {
       if (!s.pattern) return;
 
       if (!patternScores[s.pattern]) {
@@ -31,37 +31,75 @@ export const getDashboard = async (req, res) => {
 
       patternScores[s.pattern].total++;
       if (s.passed) patternScores[s.pattern].correct++;
+
+      const date = new Date(s.createdAt).toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata", 
+      });
+
+      if (!skillHistory[s.pattern]) {
+        skillHistory[s.pattern] = {};
+      }
+
+      if (!skillHistory[s.pattern][date]) {
+        skillHistory[s.pattern][date] = { total: 0, correct: 0 };
+      }
+
+      skillHistory[s.pattern][date].total++;
+      if (s.passed) skillHistory[s.pattern][date].correct++;
     });
 
-    const weakAreas = Object.entries(patternScores)
-      .map(([pattern, data]) => ({
-        pattern,
-        score: Math.round((data.correct / data.total) * 100),
-      }))
-      .filter(p => p.score < 50)
-      .map(p => p.pattern);
+    const skills = Object.entries(patternScores).map(([pattern, data]) => {
+      const score = Math.round((data.correct / data.total) * 100);
+
+      let level = "Strong";
+      if (score < 60) level = "Weak";
+      else if (score < 80) level = "Needs Improvement";
+
+      const history = Object.entries(skillHistory[pattern] || {}).map(
+        ([date, val]) => ({
+          date,
+          score: Math.round((val.correct / val.total) * 100),
+        })
+      );
+
+      return {
+        name: pattern,
+        score,
+        level,
+        history,
+      };
+    });
+
+    const weakAreas = skills
+      .filter(skill => skill.level !== "Strong")
+      .map(skill => skill.name);
 
     const recentActivity = submissions.slice(0, 5).map(s => ({
       problemId: s.problemId,
       status: s.passed ? "Solved" : "Attempted",
     }));
 
-    // ✅ FIX 3: same source as submit
     const allProblems = loadProblems();
+
     const upcomingChallenges = allProblems
       .filter(p => !solvedProblemSet.has(String(p._id)))
       .slice(0, 5)
       .map(p => p.title);
 
-    const skills = Object.entries(patternScores).map(([pattern, data]) => ({
-      name: pattern,
-      score: Math.round((data.correct / data.total) * 100),
-    }));
+    const practiceRecommendations = weakAreas.map(area => {
+      const recommendedProblem = allProblems.find(
+        p =>
+          p.pattern === area &&
+          !solvedProblemSet.has(String(p._id))
+      );
 
-    const practiceRecommendations = weakAreas.map(area => ({
-      title: `${area} Practice`,
-      description: `Practice more ${area} problems to improve accuracy.`,
-    }));
+      return recommendedProblem
+        ? {
+            title: recommendedProblem.title,
+            description: `Recommended ${area} problem to improve your performance.`,
+          }
+        : null;
+    }).filter(Boolean);
 
     res.json({
       problemsSolved,
