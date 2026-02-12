@@ -1,58 +1,38 @@
 import { GoogleGenAI } from "@google/genai";
-import { performance } from "perf_hooks";
+import { ruleAnalyzer } from "./ruleAnalyzer.js";
 
 const ai = process.env.GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
   : null;
 
-export const analyzeSubmission = async ({ problem, submission }) => {
+export const analyzeSubmission = async ({ problem, submission, testResults }) => {
   const { code, language } = submission;
-  const testResults = [];
 
-  for (const testCase of problem.testCases) {
-    const startTime = performance.now();
-    let output = "";
-    let passed = false;
-    let error = null;
+  const ruleFeedback = ruleAnalyzer({ problem, submission });
 
+  let geminiFeedback = null;
+
+  if (ai) {
     try {
-      output = eval(code + `\n${testCase.input}`);
-      passed =
-        String(output).replace(/\s/g, "") ===
-        String(testCase.expected).replace(/\s/g, "");
-    } catch (err) {
-      error = err.message;
-      passed = false;
-    }
+      const prompt = `
+You are an expert DSA code reviewer.
 
-    const endTime = performance.now();
-    const execTimeMs = Math.round(endTime - startTime);
-
-    testResults.push({
-      input: testCase.input,
-      expected: testCase.expected,
-      output: output ?? "",
-      passed,
-      execTimeMs,
-      error,
-    });
-  }
-
-  const userPrompt = `
-You are a programming coach.
+Analyze the following submission and return STRICT JSON only.
 
 Problem:
 Title: ${problem.title}
 Description: ${problem.description}
 Pattern: ${problem.pattern}
 
-User code (${language}):
+Language: ${language}
+
+Code:
 ${code}
 
-Test results:
+Test Results:
 ${JSON.stringify(testResults, null, 2)}
 
-Return ONLY JSON with the structure:
+Return ONLY this JSON format:
 {
   "Efficiency": {"score": number, "comments": string[], "suggestions": string[]},
   "Code Readability": {"score": number, "comments": string[], "suggestions": string[]},
@@ -60,44 +40,63 @@ Return ONLY JSON with the structure:
   "complexity": {"time": string, "space": string, "bestTime": string, "bestSpace": string},
   "lineFeedback": [{"line": number, "message": string}],
   "learningTips": string[],
-  "summary": string,
-  "testResults": []
+  "summary": string
 }
-
-Evaluate efficiency, readability, edge cases, and time/space complexity. Include testResults unchanged.
-Respond with valid JSON only.
 `;
 
-  let feedback = {};
-  if (ai) {
-    try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: userPrompt,
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
-      feedback = JSON.parse(response.text?.trim() || "{}");
-    } catch {
-      feedback = null;
+
+      let text = response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      text = text.replace(/```json|```/g, "").trim();
+
+      geminiFeedback = JSON.parse(text);
+    } catch (err) {
+      console.error("Gemini parse error:", err.message);
+      geminiFeedback = null;
     }
   }
 
-  if (!feedback || typeof feedback !== "object") {
-    feedback = {
-      Efficiency: { score: 7, comments: ["Fallback"], suggestions: [] },
-      "Code Readability": { score: 7, comments: ["Fallback"], suggestions: [] },
-      "Edge Cases": { score: 7, comments: ["Fallback"], suggestions: [] },
-      complexity: { time: "O(n)", space: "O(n)", bestTime: "O(n)", bestSpace: "O(1)" },
-      lineFeedback: [],
-      learningTips: [],
-      summary: "AI feedback unavailable; using fallback.",
-      testResults,
-    };
-  }
+  const finalFeedback = mergeFeedback(ruleFeedback, geminiFeedback);
 
-  feedback.testResults = testResults;
-  feedback.overallScore = Math.round(
-    (feedback.Efficiency.score + feedback["Code Readability"].score + feedback["Edge Cases"].score) / 3
+  finalFeedback.testResults = testResults;
+
+  finalFeedback.overallScore = Math.round(
+    (
+      finalFeedback.Efficiency.score +
+      finalFeedback["Code Readability"].score +
+      finalFeedback["Edge Cases"].score
+    ) / 3
   );
 
-  return feedback;
+  return finalFeedback;
 };
+
+function mergeFeedback(rule, gemini) {
+  if (!gemini) return rule;
+
+  return {
+    Efficiency: mergeSection(rule.Efficiency, gemini.Efficiency),
+    "Code Readability": mergeSection(rule["Code Readability"], gemini["Code Readability"]),
+    "Edge Cases": mergeSection(rule["Edge Cases"], gemini["Edge Cases"]),
+    complexity: gemini.complexity || rule.complexity,
+    lineFeedback: [...(rule.lineFeedback || []), ...(gemini.lineFeedback || [])],
+    learningTips: [...new Set([...(rule.learningTips || []), ...(gemini.learningTips || [])])],
+    summary: gemini.summary || rule.summary
+  };
+}
+
+function mergeSection(rulePart, geminiPart) {
+  if (!geminiPart) return rulePart;
+
+  return {
+    score: Math.max(1, Math.min(10, Math.round(
+      (rulePart.score + geminiPart.score) / 2
+    ))),
+    comments: [...new Set([...(rulePart.comments || []), ...(geminiPart.comments || [])])],
+    suggestions: [...new Set([...(rulePart.suggestions || []), ...(geminiPart.suggestions || [])])]
+  };
+}
