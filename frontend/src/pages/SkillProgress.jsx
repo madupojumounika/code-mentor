@@ -45,26 +45,18 @@ const SkillProgress = () => {
       const skillsActiveState = {};
       const weakData = [];
       const pieChart = [];
+   (data.skills || []).forEach((skill, idx) => {
+     skillsActiveState[skill.name] = true;
 
-      (data.skills || []).forEach((skill, idx) => {
-        skillsActiveState[skill.name] = true;
-
-        if (skill.history && skill.history.length) {
-          skill.history.forEach((h) => {
-            chartData.push({
-              day: h.date.split("T")[0],
-              pattern: skill.name,
-              score: h.score,
-            });
-          });
-        } else {
-          chartData.push({
-            day: new Date().toISOString().split("T")[0],
-            pattern: skill.name,
-            score: skill.score,
-          });
-        }
-
+    if (skill.history && skill.history.length) {
+       skill.history.forEach((h) => {
+         chartData.push({
+          day: new Date(h.date).toLocaleDateString("en-CA"),
+          pattern: skill.name,
+          score: h.score,
+    });
+       });
+      }
         pieChart.push({
           name: skill.name,
           value: skill.score,
