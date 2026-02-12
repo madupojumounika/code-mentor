@@ -169,14 +169,7 @@ New features and improvements are continuously being added.
 - 🌐 Deployment with CI/CD
 - 🧑‍🤝‍🧑 Peer comparison analytics
 - 📊 Advanced performance charts
-
----
-
-## 👩‍💻 Developer
-
-**Mounika Madupoju**  
-MERN Stack Developer | Problem Solver | AI Integration Enthusiast  
-
+ 
 ---
 
 ## 📫 Connect With Me
