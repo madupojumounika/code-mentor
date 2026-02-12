@@ -34,7 +34,7 @@ export const ruleAnalyzer = ({ problem, submission }) => {
   }
 
   if (!/null|undefined|length\s*===\s*0/.test(code)) {
-    feedback["Edge Cases"].score -= 3;
+    feedback["Edge Cases"].score -= 2;
     feedback["Edge Cases"].comments.push("Missing empty input checks");
     feedback["Edge Cases"].suggestions.push("Validate input before processing");
   }
