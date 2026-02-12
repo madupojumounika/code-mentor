@@ -7,16 +7,6 @@ This project focuses on real-world backend architecture, analytics dashboards, a
 
 ---
 
-## 🚀 About Me
-
-- 💻 Full-Stack Developer specializing in **MERN Stack**
-- 🧠 Passionate about integrating **AI (Gemini API)** into real-world applications
-- 📊 Interested in building analytics-driven dashboards
-- 🔐 Strong understanding of authentication & backend architecture
-- 🎯 Focused on scalable, maintainable system design
-  
- ---
-
 ## ✨ Features
 
 - 🔐 Secure JWT Authentication (Login / Register)
