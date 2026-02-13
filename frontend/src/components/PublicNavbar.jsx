@@ -8,14 +8,17 @@ const PublicNavbar = () => {
       
       <div className="w-full px-10 py-6 flex justify-between items-center">
 
+        {/* Logo Section */}
         <div className="flex items-center gap-4 cursor-pointer group transition-all duration-500">
           
-          {/* Logo */}
+          {/* Logo Icon */}
           <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md group-hover:bg-white/20 transition-all duration-500">
-            <FaRobot className="text-white text-4xl transition-all duration-500 
-            group-hover:scale-125 
-            group-hover:rotate-6 
-            group-hover:drop-shadow-[0_0_20px_white]" />
+            <FaRobot 
+              className="text-white text-4xl transition-all duration-500 
+              group-hover:scale-125 
+              group-hover:rotate-6 
+              group-hover:drop-shadow-[0_0_20px_white]" 
+            />
           </div>
 
           {/* Brand Name */}
@@ -31,9 +34,42 @@ const PublicNavbar = () => {
           </h1>
         </div>
 
-        <div className="flex items-center gap-8">
-          
-          {/* Login Button*/}
+        {/* Right Side Buttons */}
+        <div className="flex items-center gap-6">
+
+          {/* Home Button */}
+          <a
+            href="#home"
+            className="relative px-6 py-2.5 text-xl font-semibold tracking-wide
+            text-white rounded-xl border border-white/40
+            backdrop-blur-md
+            transition-all duration-500
+            hover:scale-110
+            hover:text-yellow-300
+            hover:border-yellow-300
+            hover:shadow-[0_0_20px_#ffffff]
+            hover:bg-white/10"
+          >
+            Home
+          </a>
+
+          {/* About Button */}
+          <a
+            href="#about"
+            className="relative px-6 py-2.5 text-xl font-semibold tracking-wide
+            text-white rounded-xl border border-white/40
+            backdrop-blur-md
+            transition-all duration-500
+            hover:scale-110
+            hover:text-yellow-300
+            hover:border-yellow-300
+            hover:shadow-[0_0_20px_#ffffff]
+            hover:bg-white/10"
+          >
+            About
+          </a>
+
+          {/* Login Button */}
           <Link
             to="/login"
             className="relative px-6 py-2.5 text-xl font-semibold tracking-wide
@@ -63,6 +99,7 @@ const PublicNavbar = () => {
             <span className="absolute inset-0 bg-white opacity-0 
             hover:opacity-20 transition duration-500"></span>
           </Link>
+
         </div>
 
       </div>

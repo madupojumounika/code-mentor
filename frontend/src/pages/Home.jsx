@@ -63,7 +63,6 @@ const Home = () => {
       {/* Hero Section */}
       <div className="relative z-10 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
-        {/* Text */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
@@ -95,7 +94,6 @@ const Home = () => {
           </motion.div>
         </motion.div>
 
-        {/* Lottie Animation */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -134,6 +132,108 @@ const Home = () => {
           </Tilt>
         ))}
       </motion.div>
+
+      {/* Why choose us */}
+      <section className="relative z-10 mt-40 max-w-7xl mx-auto px-6 text-center">
+        <h2 className="text-5xl font-extrabold text-white mb-6">
+          Why Choose Code Mentor?
+        </h2>
+        <p className="text-white/80 text-lg max-w-3xl mx-auto mb-20">
+          Everything you need to crack coding interviews in one powerful AI-driven platform.
+        </p>
+
+        <div className="grid md:grid-cols-4 gap-10">
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300">
+            <div className="text-4xl mb-4">💼</div>
+            <h3 className="text-2xl font-semibold text-white mb-4">
+              Real Interview Problems
+            </h3>
+            <p className="text-white/80 text-lg">
+              Practice curated problems asked in top tech companies.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300">
+            <div className="text-4xl mb-4">🤖</div>
+            <h3 className="text-2xl font-semibold text-white mb-4">
+              AI Code Analysis
+            </h3>
+            <p className="text-white/80 text-lg">
+              Get instant feedback, optimizations & time complexity analysis.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-2xl font-semibold text-white mb-4">
+              Smart Progress Tracking
+            </h3>
+            <p className="text-white/80 text-lg">
+              Visual dashboards to measure your improvement.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300">
+            <div className="text-4xl mb-4">⚡</div>
+            <h3 className="text-2xl font-semibold text-white mb-4">
+              Fast & Interactive UI
+            </h3>
+            <p className="text-white/80 text-lg">
+              Smooth experience with modern design and real-time responses.
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      {/* About */}
+      <section
+        id="about"
+        className="relative z-10 mt-44 max-w-7xl mx-auto px-6 text-center"
+      >
+        <h2 className="text-5xl font-extrabold text-white mb-6">
+          About Code Mentor
+        </h2>
+
+        <p className="text-white/80 text-lg max-w-4xl mx-auto mb-16 leading-relaxed">
+          Code Mentor is an AI-powered coding interview preparation platform
+          designed to help students and developers master problem solving,
+          improve logical thinking, and confidently crack technical interviews.
+          Our mission is to make interview preparation smart, structured, and
+          accessible to everyone.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-12 mb-24">
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300 text-left">
+            <h3 className="text-3xl font-bold text-yellow-300 mb-6">
+              🚀 Our Mission
+            </h3>
+            <p className="text-white/80 text-lg leading-relaxed">
+              To empower every learner with AI-driven feedback, real interview
+              problems, and structured learning paths.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300 text-left">
+            <h3 className="text-3xl font-bold text-pink-300 mb-6">
+              🎯 Our Vision
+            </h3>
+            <p className="text-white/80 text-lg leading-relaxed">
+              To become the most trusted AI-based coding mentor for interview success.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/*footer*/}
+      <footer className="relative z-10 mt-44 py-12 border-t border-white/20 text-center text-white/70">
+        <p className="text-lg">
+          © {new Date().getFullYear()} Code Mentor. All rights reserved.
+        </p>
+        <p className="mt-3 text-white/60">
+          Built with ❤️ using React, Tailwind CSS & AI
+        </p>
+      </footer>
+
     </div>
   );
 };
