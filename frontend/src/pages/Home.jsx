@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import { FaCode, FaRobot, FaChartLine } from "react-icons/fa";
+import { FaCode, FaRobot, FaChartLine, FaComments } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 import Tilt from "react-parallax-tilt";
@@ -61,7 +61,7 @@ const Home = () => {
       <div className="absolute top-40 -right-32 w-96 h-96 bg-indigo-400 opacity-30 rounded-full blur-3xl" />
 
       {/* Hero Section */}
-      <div className="relative z-10 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center min-h-[80vh]">
 
         <motion.div
           initial={{ opacity: 0, x: -40 }}
@@ -224,15 +224,73 @@ const Home = () => {
         </div>
       </section>
 
-      {/*footer*/}
+      {/* Statistics Section */}
+      <section className="relative z-10 mt-40 text-center max-w-7xl mx-auto px-6">
+        <h2 className="text-5xl font-extrabold text-white mb-16">Platform Impact</h2>
+        <div className="grid md:grid-cols-4 gap-10">
+          {[
+            { number: "10K+", label: "Active Users" },
+            { number: "50K+", label: "Problems Solved" },
+            { number: "95%", label: "Success Rate" },
+            { number: "24/7", label: "AI Assistance" },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl"
+            >
+              <h3 className="text-4xl font-bold text-yellow-300 mb-4">{item.number}</h3>
+              <p className="text-white/80 text-lg">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Upcoming Features*/}
+      <section className="relative z-10 mt-40 max-w-7xl mx-auto px-6 text-center">
+        <h2 className="text-5xl font-extrabold text-white mb-6">
+          Upcoming Features
+        </h2>
+        <p className="text-white/80 text-lg max-w-3xl mx-auto mb-20">
+          We are continuously improving Code Mentor with new AI-driven tools to enhance your coding journey.
+        </p>
+
+        <div className="grid md:grid-cols-3 gap-10">
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300">
+            <div className="text-4xl mb-4">🧠</div>
+            <h3 className="text-2xl font-semibold text-white mb-4">Mock Interview Mode</h3>
+            <p className="text-white/80 text-lg">Simulate real-time coding interviews with AI interviewer feedback.</p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300">
+            <div className="text-4xl mb-4">🏆</div>
+            <h3 className="text-2xl font-semibold text-white mb-4">Leaderboard System</h3>
+            <p className="text-white/80 text-lg">Compete with peers and track your global ranking.</p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl hover:scale-105 transition duration-300">
+            <div className="text-4xl mb-4">📚</div>
+            <h3 className="text-2xl font-semibold text-white mb-4">Personalized Learning Paths</h3>
+            <p className="text-white/80 text-lg">AI suggests topics based on your strengths & weaknesses.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
       <footer className="relative z-10 mt-44 py-12 border-t border-white/20 text-center text-white/70">
         <p className="text-lg">
           © {new Date().getFullYear()} Code Mentor. All rights reserved.
         </p>
         <p className="mt-3 text-white/60">
-          Built with ❤️ using React, Tailwind CSS & AI
+          Helping students ace coding interviews with AI-driven practice.
         </p>
       </footer>
+
+      <div
+        onClick={() => navigate("/feedback")}
+        className="fixed bottom-8 right-8 bg-yellow-400 hover:bg-yellow-500 text-black p-5 rounded-full shadow-2xl cursor-pointer transition duration-300 z-50"
+      >
+        <FaComments size={24} />
+      </div>
 
     </div>
   );
