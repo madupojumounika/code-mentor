@@ -46,6 +46,10 @@ const DashboardNavbar = () => {
 
         {/* Links */}
         <div className="flex items-center gap-6 text-white font-medium">
+          <NavLink to="/" className={linkClass}>
+            <FaHome /> Home
+          </NavLink>
+
           <NavLink to="/dashboard" className={linkClass}>
             <FaHome /> Dashboard
           </NavLink>

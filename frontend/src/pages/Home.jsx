@@ -223,28 +223,7 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Statistics Section */}
-      <section className="relative z-10 mt-40 text-center max-w-7xl mx-auto px-6">
-        <h2 className="text-5xl font-extrabold text-white mb-16">Platform Impact</h2>
-        <div className="grid md:grid-cols-4 gap-10">
-          {[
-            { number: "10K+", label: "Active Users" },
-            { number: "50K+", label: "Problems Solved" },
-            { number: "95%", label: "Success Rate" },
-            { number: "24/7", label: "AI Assistance" },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl"
-            >
-              <h3 className="text-4xl font-bold text-yellow-300 mb-4">{item.number}</h3>
-              <p className="text-white/80 text-lg">{item.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
+      
       {/* Upcoming Features*/}
       <section className="relative z-10 mt-40 max-w-7xl mx-auto px-6 text-center">
         <h2 className="text-5xl font-extrabold text-white mb-6">
@@ -275,13 +254,56 @@ const Home = () => {
         </div>
       </section>
 
+      <section className="relative z-10 mt-44 px-6">
+        <div className="max-w-6xl mx-auto relative">
+
+          <div className="relative bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl px-10 py-20 text-center overflow-hidden">
+
+           <div className="absolute -top-16 -left-16 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl"></div>
+           <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl"></div>
+
+         <div className="relative z-10">
+
+        <h2 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6">
+          Ready to Crack Your <span className="bg-gradient-to-r from-yellow-300 to-pink-400 bg-clip-text text-transparent">Next Interview?</span>
+        </h2>
+
+        <p className="text-white/80 text-lg md:text-xl max-w-3xl mx-auto mb-12">
+          Practice smarter. Get instant AI feedback. Track your improvement.
+          Everything you need to become interview-ready — in one platform.
+        </p>
+
+        <div className="flex justify-center gap-6 flex-wrap">
+
+          <a
+            href="/register"
+            className="relative group bg-white text-indigo-700 px-12 py-4 rounded-2xl font-semibold text-lg shadow-xl transition-all duration-300 hover:scale-105"
+          >
+            <span className="relative z-10">Create Free Account 🚀</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-pink-400 rounded-2xl opacity-0 group-hover:opacity-20 transition duration-300"></div>
+          </a>
+
+          <a
+            href="/login"
+            className="px-12 py-4 rounded-2xl font-semibold text-lg border border-white/40 text-white hover:bg-white hover:text-indigo-700 transition duration-300"
+          >
+            Login
+          </a>
+         </div>
+
+        </div>
+      </div>
+     </div>
+    </section>
+
       {/* Footer */}
       <footer className="relative z-10 mt-44 py-12 border-t border-white/20 text-center text-white/70">
         <p className="text-lg">
-          © {new Date().getFullYear()} Code Mentor. All rights reserved.
+          @ {new Date().getFullYear()} Code Mentor. All rights reserved.
         </p>
-        <p className="mt-3 text-white/60">
-          Helping students ace coding interviews with AI-driven practice.
+        <p className="mt-2 text-white/50 text-sm max-w-md mx-auto text-center">
+          ✦⚡Built to simplify interview preparation through structured practice,
+          smart AI feedback, and real-world coding challenges⚡✦
         </p>
       </footer>
 
