@@ -1,4 +1,3 @@
-// /src/components/AppLayout.jsx
 import { Outlet, useLocation } from "react-router-dom";
 import PublicNavbar from "./PublicNavbar";
 import DashboardNavbar from "./DashboardNavbar";
