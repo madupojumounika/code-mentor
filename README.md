@@ -121,7 +121,7 @@ Create a `.env` file inside backend:
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
-OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 Run backend:
