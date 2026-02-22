@@ -14,35 +14,66 @@ export function runCPP(code, testCases) {
 using json = nlohmann::json;
 using namespace std;
 
+// User solution
 ${code}
 
 int main(int argc, char* argv[]) {
-  try {
-    auto in = json::parse(argv[1]);
-    auto res = solution(in);
-    cout << res.dump();
-  } catch (...) {
-    cout << "Runtime Error";
-  }
+    try {
+        json in = json::parse(argv[1]);
+        json out;
+
+        // Determine input type
+        if(in.is_array() && in.size() > 1 && in[0].is_array() && in[1].is_number_integer()){
+            // Array + int (e.g., Two Sum)
+            vector<int> nums = in[0].get<vector<int>>();
+            int target = in[1].get<int>();
+            out = solution(nums, target);
+        }
+        else if(in.is_array() && in.size() > 0 && in[0].is_array()){
+            // Single array
+            vector<int> nums = in[0].get<vector<int>>();
+            out = solution(nums);
+        }
+        else if(in.is_array() && in.size() == 1 && in[0].is_number_integer()){
+            // Single int
+            int n = in[0].get<int>();
+            out = solution(n);
+        }
+        else{
+            // Fallback
+            out = solution(in);
+        }
+
+        cout << out.dump();
+    } catch (...) {
+        cout << "Runtime Error";
+    }
+    return 0;
 }
 `;
+
+    // Write temp file
     fs.writeFileSync(SRC, wrapped);
 
+    // Compile
     exec(`g++ -std=c++17 "${SRC}" -o "${OUT}"`, err => {
       if (err) return resolve([]);
 
       const runOne = i => {
         if (i === testCases.length) return resolve(results);
         const tc = testCases[i];
+
         exec(`"${OUT}" '${tc.input}'`, (_, stdout) => {
           results.push({
             input: tc.input,
             expected: tc.output,
-            output: stdout.trim()
+            output: stdout.trim(),
+            passed: stdout.trim() === tc.output
           });
           runOne(i + 1);
         });
       };
+
       runOne(0);
     });
   });
