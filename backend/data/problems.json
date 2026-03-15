@@ -1,6 +1,7 @@
 [
   {
     "_id": "array1",
+    "type": "array",
     "title": "Two Sum",
     "category": "Array",
     "difficulty": "Easy",
@@ -22,6 +23,7 @@
   },
   {
     "_id": "array2",
+    "type": "array",
     "title": "Best Time to Buy and Sell Stock",
     "category": "Array",
     "difficulty": "Easy",
@@ -43,6 +45,7 @@
   },
   {
     "_id": "array3",
+    "type": "array",
     "title": "Maximum Subarray",
     "category": "Array",
     "difficulty": "Medium",
@@ -63,6 +66,7 @@
   },
   {
     "_id": "array4",
+    "type": "array",
     "title": "Contains Duplicate",
     "category": "Array",
     "difficulty": "Easy",
@@ -84,6 +88,7 @@
   },
   {
     "_id": "array5",
+    "type": "array",
     "title": "Product of Array Except Self",
     "category": "Array",
     "difficulty": "Medium",
@@ -104,6 +109,7 @@
   },
   {
     "_id": "string1",
+    "type": "string",
     "title": "Valid Anagram",
     "category": "String",
     "difficulty": "Easy",
@@ -125,6 +131,7 @@
   },
   {
     "_id": "string2",
+    "type": "string",
     "title": "Longest Substring Without Repeating Characters",
     "category": "String",
     "difficulty": "Medium",
@@ -146,6 +153,7 @@
   },
   {
     "_id": "linkedlist1",
+    "type": "linkedlist",
     "title": "Reverse Linked List",
     "category": "LinkedList",
     "difficulty": "Easy",
@@ -166,6 +174,7 @@
   },
   {
     "_id": "tree1",
+    "type": "tree",
     "title": "Binary Tree Inorder Traversal",
     "category": "Tree",
     "difficulty": "Medium",
@@ -187,6 +196,7 @@
   },
   {
     "_id": "tree2",
+    "type": "tree",
     "title": "Maximum Depth of Binary Tree",
     "category": "Tree",
     "difficulty": "Easy",
@@ -207,6 +217,7 @@
   },
   {
     "_id": "tree3",
+    "type": "tree",
     "title": "Validate Binary Search Tree",
     "category": "Tree",
     "difficulty": "Medium",
@@ -225,7 +236,28 @@
     ]
   },
   {
+    "_id": "tree4",
+    "type": "tree",
+    "title": "Lowest Common Ancestor of a BST",
+    "category": "Tree",
+    "difficulty": "Medium",
+    "description": "Find lowest common ancestor of two nodes.",
+    "pattern": "DFS",
+    "requiresValidation": true,
+    "starterCode": {
+      "javascript": "function solution(root, p, q) {}",
+      "python": "def solution(root, p, q): pass",
+      "java": "public static TreeNode solution(TreeNode root, TreeNode p, TreeNode q) { return null; }",
+      "cpp": "TreeNode* solution(TreeNode* root, TreeNode* p, TreeNode* q) { return nullptr; }"
+    },
+    "testCases": [
+      { "input": "[[6,2,8,0,4,7,9,null,null,3,5],2,8]", "output": "6" },
+      { "input": "[[6,2,8,0,4,7,9,null,null,3,5],2,4]", "output": "2" }
+    ]
+  },
+  {
     "_id": "graph1",
+    "type": "graph",
     "title": "Number of Islands",
     "category": "Graph",
     "difficulty": "Medium",
@@ -245,6 +277,7 @@
   },
   {
     "_id": "graph2",
+    "type": "graph",
     "title": "Clone Graph",
     "category": "Graph",
     "difficulty": "Medium",
@@ -262,101 +295,8 @@
     ]
   },
   {
-    "_id": "dp1",
-    "title": "Climbing Stairs",
-    "category": "Dynamic Programming",
-    "difficulty": "Easy",
-    "description": "Count ways to climb stairs.",
-    "pattern": "DP",
-    "requiresValidation": true,
-    "starterCode": {
-      "javascript": "function solution(n) {}",
-      "python": "def solution(n): pass",
-      "java": "public static int solution(int n) { return 0; }",
-      "cpp": "int solution(int n) { return 0; }"
-    },
-    "testCases": [
-      { "input": "[2]", "output": "2" },
-      { "input": "[3]", "output": "3" }
-    ]
-  },
-  {
-    "_id": "dp2",
-    "title": "House Robber",
-    "category": "Dynamic Programming",
-    "difficulty": "Medium",
-    "description": "Maximize amount without robbing adjacent houses.",
-    "pattern": "DP",
-    "requiresValidation": true,
-    "starterCode": {
-      "javascript": "function solution(nums) {}",
-      "python": "def solution(nums): pass",
-      "java": "public static int solution(int[] nums) { return 0; }",
-      "cpp": "int solution(std::vector<int> nums) { return 0; }"
-    },
-    "testCases": [
-      { "input": "[[1,2,3,1]]", "output": "4" },
-      { "input": "[[2,7,9,3,1]]", "output": "12" }
-    ]
-  },
-  {
-    "_id": "dp3",
-    "title": "Coin Change",
-    "category": "Dynamic Programming",
-    "difficulty": "Medium",
-    "description": "Find minimum coins to make amount.",
-    "pattern": "DP",
-    "requiresValidation": true,
-    "starterCode": {
-      "javascript": "function solution(coins, amount) {}",
-      "python": "def solution(coins, amount): pass",
-      "java": "public static int solution(int[] coins, int amount) { return 0; }",
-      "cpp": "int solution(std::vector<int> coins, int amount) { return 0; }"
-    },
-    "testCases": [
-      { "input": "[[1,2,5],11]", "output": "3" },
-      { "input": "[[2],3]", "output": "-1" }
-    ]
-  },
-  {
-    "_id": "linkedlist3",
-    "title": "Merge k Sorted Lists",
-    "category": "LinkedList",
-    "difficulty": "Hard",
-    "description": "Merge k sorted linked lists into one sorted list.",
-    "pattern": "Heap",
-    "requiresValidation": true,
-    "starterCode": {
-      "javascript": "function solution(lists) {}",
-      "python": "def solution(lists): pass",
-      "java": "public static ListNode solution(ListNode[] lists) { return null; }",
-      "cpp": "ListNode* solution(std::vector<ListNode*> lists) { return nullptr; }"
-    },
-    "testCases": [
-      { "input": "[[[1,4,5],[1,3,4],[2,6]]]", "output": "[1,1,2,3,4,4,5,6]" }
-    ]
-  },
-  {
-    "_id": "tree4",
-    "title": "Lowest Common Ancestor of a BST",
-    "category": "Tree",
-    "difficulty": "Medium",
-    "description": "Find lowest common ancestor of two nodes.",
-    "pattern": "DFS",
-    "requiresValidation": true,
-    "starterCode": {
-      "javascript": "function solution(root, p, q) {}",
-      "python": "def solution(root, p, q): pass",
-      "java": "public static TreeNode solution(TreeNode root, TreeNode p, TreeNode q) { return null; }",
-      "cpp": "TreeNode* solution(TreeNode* root, TreeNode* p, TreeNode* q) { return nullptr; }"
-    },
-    "testCases": [
-      { "input": "[[6,2,8,0,4,7,9,null,null,3,5],2,8]", "output": "6" },
-      { "input": "[[6,2,8,0,4,7,9,null,null,3,5],2,4]", "output": "2" }
-    ]
-  },
-  {
     "_id": "graph3",
+    "type": "graph",
     "title": "Course Schedule",
     "category": "Graph",
     "difficulty": "Medium",
@@ -376,6 +316,7 @@
   },
   {
     "_id": "graph4",
+    "type": "graph",
     "title": "Topological Sort",
     "category": "Graph",
     "difficulty": "Medium",
@@ -390,6 +331,66 @@
     },
     "testCases": [
       { "input": "[2,[[1,0]]]", "output": "[0,1]" }
+    ]
+  },
+  {
+    "_id": "dp1",
+    "type": "dp",
+    "title": "Climbing Stairs",
+    "category": "Dynamic Programming",
+    "difficulty": "Easy",
+    "description": "Count ways to climb stairs.",
+    "pattern": "DP",
+    "requiresValidation": true,
+    "starterCode": {
+      "javascript": "function solution(n) {}",
+      "python": "def solution(n): pass",
+      "java": "public static int solution(int n) { return 0; }",
+      "cpp": "int solution(int n) { return 0; }"
+    },
+    "testCases": [
+      { "input": "[2]", "output": "2" },
+      { "input": "[3]", "output": "3" }
+    ]
+  },
+  {
+    "_id": "dp2",
+    "type": "dp",
+    "title": "House Robber",
+    "category": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "Maximize amount without robbing adjacent houses.",
+    "pattern": "DP",
+    "requiresValidation": true,
+    "starterCode": {
+      "javascript": "function solution(nums) {}",
+      "python": "def solution(nums): pass",
+      "java": "public static int solution(int[] nums) { return 0; }",
+      "cpp": "int solution(std::vector<int> nums) { return 0; }"
+    },
+    "testCases": [
+      { "input": "[[1,2,3,1]]", "output": "4" },
+      { "input": "[[2,7,9,3,1]]", "output": "12" }
+    ]
+  },
+  {
+    "_id": "dp3",
+    "type": "dp",
+    "title": "Coin Change",
+    "category": "Dynamic Programming",
+    "difficulty": "Medium",
+    "description": "Find minimum coins to make amount.",
+    "pattern": "DP",
+    "requiresValidation": true,
+    "starterCode": {
+      "javascript": "function solution(coins, amount) {}",
+      "python": "def solution(coins, amount): pass",
+      "java": "public static int solution(int[] coins, int amount) { return 0; }",
+      "cpp": "int solution(std::vector<int> coins, int amount) { return 0; }"
+    },
+    "testCases": [
+      { "input": "[[1,2,5],11]", "output": "3" },
+      { "input": "[[2],3]", "output": "-1" }
     ]
   }
 ]

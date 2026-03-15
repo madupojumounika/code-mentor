@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-//protect middleware
 export const protect = async (req, res, next) => {
   let token;
 
@@ -9,18 +8,30 @@ export const protect = async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
+    token = req.headers.authorization.split(" ")[1];
+
     try {
-      token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
       req.user = await User.findById(decoded.id).select("-password");
-      next();
+
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      return next();
     } catch (err) {
-      console.error("Auth Middleware Error:", err);
-      return res.status(401).json({ message: "Not authorized, token failed" });
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({
+          message: "Session expired. Please login again.",
+        });
+      }
+
+      return res.status(401).json({
+        message: "Invalid token. Authorization failed.",
+      });
     }
   }
 
-  if (!token) {
-    return res.status(401).json({ message: "Not authorized, no token" });
-  }
+  return res.status(401).json({ message: "Not authorized, no token" });
 };
