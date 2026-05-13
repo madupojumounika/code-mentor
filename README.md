@@ -1,5 +1,7 @@
 ## 🚀💻 CodeMentor – AI-Powered Code Interview Coach & Skill Development Platform
 
+A production-grade MERN + AI system that simulates real coding interviews with automated feedback and performance analytics.
+
 A modern **full-stack coding practice and skill tracking platform** built with the MERN stack.  
 It helps users solve problems, track topic-wise progress, identify weak areas, and receive intelligent AI-based feedback.
 
@@ -17,6 +19,7 @@ This project focuses on real-world backend architecture, analytics dashboards, a
 - 🧩 Coding problem simulator
 - 🎨 Modern responsive UI with Dark Mode
 - ⚡ Real-time performance updates
+- 🚀 Built to simulate real-world coding interviews with AI-driven evaluation
 
 ---
 
@@ -34,7 +37,7 @@ This project focuses on real-world backend architecture, analytics dashboards, a
 - MongoDB
 - Mongoose
 - JWT Authentication
-- Gemini API Integration
+- Groq SDK
 
 ### Tools & Platforms
 - Git & GitHub
@@ -49,6 +52,8 @@ This project focuses on real-world backend architecture, analytics dashboards, a
 
 ## 🏗 System Architecture
 
+### High-Level Flow
+
 ```
 Client (React)
      ↓
@@ -60,7 +65,7 @@ Controllers (Business Logic)
      ↓
 MongoDB Database
      ↓
-Gemini AI Integration
+Groq (LLaMA 3.1)
 ```
 
 This layered architecture ensures scalability, maintainability, and separation of concerns.
@@ -84,7 +89,12 @@ This project is intended for:
 1. User submits coding solution  
 2. Backend validates solution  
 3. Rule-based analyzer evaluates structure  
-4. AI generates improvement suggestions  
+4. AI (Groq LLaMA 3.1) analyzes code submissions and returns structured evaluation in JSON format including:
+- Efficiency score
+- Code readability analysis
+- Edge case detection
+- Complexity analysis
+- Learning suggestions
 5. Feedback displayed in dashboard  
 
 ---
@@ -121,7 +131,7 @@ Create a `.env` file inside backend:
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
-GEMINI_API_KEY=your_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
 Run backend:
