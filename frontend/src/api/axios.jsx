@@ -32,7 +32,7 @@ api.interceptors.response.use(
       if (!refreshToken) return Promise.reject(error);
 
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/refresh-token`,
+        `${process.env.REACT_APP_API_URL}/auth/refresh-token`,
         { token: refreshToken }
       );
 
