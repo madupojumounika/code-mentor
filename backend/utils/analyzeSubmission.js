@@ -1,20 +1,21 @@
-import { GoogleGenAI } from "@google/genai";
-import { ruleAnalyzer } from "./ruleAnalyzer.js";
+import Groq from "groq-sdk";
 
-const ai = process.env.GEMINI_API_KEY
-  ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+const groq = process.env.GROQ_API_KEY
+  ? new Groq({ apiKey: process.env.GROQ_API_KEY })
   : null;
+
+import { ruleAnalyzer } from "./ruleAnalyzer.js";
 
 export const analyzeSubmission = async ({ problem, submission, testResults }) => {
   const { code, language } = submission;
 
   const ruleFeedback = ruleAnalyzer({ problem, submission });
 
-  let geminiFeedback = null;
+  let groqFeedback = null;
 
-  if (ai) {
-    try {
-      const prompt = `
+if (groq) {
+  try {
+    const prompt = `
 You are an expert DSA code reviewer.
 
 Analyze the following submission and return STRICT JSON only.
@@ -44,59 +45,69 @@ Return ONLY this JSON format:
 }
 `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-      });
+    const response = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.2,
+    });
 
-      let text = response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let text = response?.choices?.[0]?.message?.content;
 
+    if (!text) {
+      console.error("Groq returned empty response");
+      groqFeedback = null;
+    } else {
       text = text.replace(/```json|```/g, "").trim();
 
-      geminiFeedback = JSON.parse(text);
-    } catch (err) {
-      console.error("Gemini parse error:", err.message);
-      geminiFeedback = null;
+      try {
+        groqFeedback = JSON.parse(text);
+      } catch (e) {
+        console.error("JSON Parse Failed:", text);
+        groqFeedback = null;
+      }
     }
-  }
 
-  const finalFeedback = mergeFeedback(ruleFeedback, geminiFeedback);
+  } catch (err) {
+    console.error("Groq error:", err.message);
+    groqFeedback = null;
+  }
+}
+
+  const finalFeedback = mergeFeedback(ruleFeedback, groqFeedback);
 
   finalFeedback.testResults = testResults;
 
-  finalFeedback.overallScore = Math.round(
-    (
-      finalFeedback.Efficiency.score +
-      finalFeedback["Code Readability"].score +
-      finalFeedback["Edge Cases"].score
-    ) / 3
-  );
+const eff = finalFeedback?.Efficiency?.score || 0;
+const read = finalFeedback?.["Code Readability"]?.score || 0;
+const edge = finalFeedback?.["Edge Cases"]?.score || 0;
+
+finalFeedback.overallScore = Math.round((eff + read + edge) / 3);
 
   return finalFeedback;
 };
 
-function mergeFeedback(rule, gemini) {
-  if (!gemini) return rule;
+function mergeFeedback(rule, ai) {
+  if (!ai) return rule;
 
   return {
-    Efficiency: mergeSection(rule.Efficiency, gemini.Efficiency),
-    "Code Readability": mergeSection(rule["Code Readability"], gemini["Code Readability"]),
-    "Edge Cases": mergeSection(rule["Edge Cases"], gemini["Edge Cases"]),
-    complexity: gemini.complexity || rule.complexity,
-    lineFeedback: [...(rule.lineFeedback || []), ...(gemini.lineFeedback || [])],
-    learningTips: [...new Set([...(rule.learningTips || []), ...(gemini.learningTips || [])])],
-    summary: gemini.summary || rule.summary
+    Efficiency: mergeSection(rule.Efficiency, ai.Efficiency),
+    "Code Readability": mergeSection(rule["Code Readability"], ai["Code Readability"]),
+    "Edge Cases": mergeSection(rule["Edge Cases"], ai["Edge Cases"]),
+    complexity: ai.complexity || rule.complexity,
+    lineFeedback: [...(rule.lineFeedback || []), ...(ai.lineFeedback || [])],
+    learningTips: [...new Set([...(rule.learningTips || []), ...(ai.learningTips || [])])],
+    summary: ai.summary || rule.summary
   };
 }
 
-function mergeSection(rulePart, geminiPart) {
-  if (!geminiPart) return rulePart;
+function mergeSection(rulePart, aiPart) {
+  if (!aiPart) return rulePart;
 
   return {
     score: Math.max(1, Math.min(10, Math.round(
-      (rulePart.score + geminiPart.score) / 2
+      (rulePart.score + aiPart.score) / 2
     ))),
-    comments: [...new Set([...(rulePart.comments || []), ...(geminiPart.comments || [])])],
-    suggestions: [...new Set([...(rulePart.suggestions || []), ...(geminiPart.suggestions || [])])]
+    comments: [...new Set([...(rulePart.comments || []), ...(aiPart.comments || [])])],
+    suggestions: [...new Set([...(rulePart.suggestions || []), ...(aiPart.suggestions || [])])]
   };
 }
