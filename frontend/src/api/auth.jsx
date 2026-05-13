@@ -10,12 +10,12 @@ export const loginUser = async ({ email, password }) => {
 
 // REGISTER
 export const registerUser = async ({ name, email, password }) => {
-  const res = await api.post("/api/auth/register", { name, email, password });
+  const res = await api.post("/auth/register", { name, email, password });
   return res.data;
 };
 
 // GET PROFILE
 export const getProfile = async () => {
-  const res = await api.get("/api/auth/profile"); 
+  const res = await api.get("/auth/profile"); 
   return res.data;
 };
