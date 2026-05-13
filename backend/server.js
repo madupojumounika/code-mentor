@@ -15,7 +15,7 @@ const app = express();
 // CORS
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://your-vercel-app.vercel.app"],
+    origin: ["http://localhost:3000", "https://code-mentor-roan.vercel.app"],
     credentials: true,
   })
 );
