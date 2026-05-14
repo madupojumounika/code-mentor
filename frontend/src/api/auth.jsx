@@ -3,8 +3,10 @@ import api from "./axios";
 // LOGIN
 export const loginUser = async ({ email, password }) => {
   const res = await api.post("/auth/login", { email, password });
-  localStorage.setItem("accessToken", res.data.token);
+
+  localStorage.setItem("accessToken", res.data.accessToken);
   localStorage.setItem("refreshToken", res.data.refreshToken);
+
   return res.data;
 };
 
@@ -16,6 +18,7 @@ export const registerUser = async ({ name, email, password }) => {
 
 // GET PROFILE
 export const getProfile = async () => {
-  const res = await api.get("/auth/profile"); 
+  const res = await api.get("/auth/profile");
   return res.data;
 };
+

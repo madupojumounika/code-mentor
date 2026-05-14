@@ -14,10 +14,13 @@ const app = express();
 
 // CORS
 app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://code-mentor-roan.vercel.app"],
-    credentials: true,
-  })
+cors({
+  origin: [
+    "http://localhost:3000",
+    "https://code-mentor-roan.vercel.app",
+  ],
+  credentials: true,
+})
 );
 
 // JSON middleware
