@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import { FaCode, FaRobot, FaChartLine, FaComments } from "react-icons/fa";
+import { FaCode, FaRobot, FaChartLine } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 import Tilt from "react-parallax-tilt";
@@ -306,13 +306,6 @@ const Home = () => {
           smart AI feedback, and real-world coding challenges⚡✦
         </p>
       </footer>
-
-      <div
-        onClick={() => navigate("/feedback")}
-        className="fixed bottom-8 right-8 bg-yellow-400 hover:bg-yellow-500 text-black p-5 rounded-full shadow-2xl cursor-pointer transition duration-300 z-50"
-      >
-        <FaComments size={24} />
-      </div>
 
     </div>
   );
